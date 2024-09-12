@@ -8,6 +8,7 @@
 - 支援指令前綴 `!`。
 - 自動加載 `./cogs` 目錄中的所有擴展。
 - 在啟動時同步應用指令樹。
+- 每個檔案項目目前皆為獨立運行，main.py為集成Discord斜線指令功能之檔案，其餘為專用功能之檔案
 
 ## 代碼詳解
 
@@ -86,10 +87,10 @@ python main.py
 ```
 # 目錄結構
 .
-├── main.py
+├── main.py(斜線指令檔案)
 └── cogs
-    ├── example_cog.py
-    └── another_cog.py
+    ├── (功能檔案).py
+    └── (功能檔案).py
 # 授權
 此項目有藉助於Copilot AI以及部分Github開源項目，使用 MIT 授權。詳情請參閱 LICENSE 文件。
 
