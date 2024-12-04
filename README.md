@@ -1,6 +1,8 @@
-# Discord Bot
+# 聊天咖啡廳 Discord 機器人
 
-這是一個使用 `discord.py` 庫製作的 【聊天の咖啡廳】Discord 機器人。該機器人可以加載位於 `./cogs` 目錄中的擴展（Cogs），並且在啟動時同步應用指令樹。目前尚有很多問題待解決，也有很多必要功能沒有添加。
+歡迎加入我們的 Discord 伺服器：[聊天咖啡廳](https://discord.gg/VzdeVzHfxB)！也歡迎參訪我們的網站：[咖啡廳網站](https://www.coffeeshoptw.com/)。
+
+這是一個使用 `discord.py` 庫製作的 Discord 機器人。該機器人可以加載位於 `./cogs` 目錄中的擴展（Cogs），並且在啟動時同步應用指令樹。本程式碼使用 GitHub Copilot 等 AI 工具進行產生，也開放各位使用及修改。
 
 ## 主要功能
 
@@ -8,90 +10,62 @@
 - 支援指令前綴 `!`。
 - 自動加載 `./cogs` 目錄中的所有擴展。
 - 在啟動時同步應用指令樹。
-- 每個檔案項目目前皆為獨立運行，all.py為集成Discord斜線指令功能之檔案，其餘為專用功能(或正在修正功能)之檔案
+- 每個檔案項目目前皆為獨立運行，`main.py` 為集成 Discord 斜線指令功能之檔案，其餘為專用功能之檔案。
 
-## 代碼詳解
+## 功能與指令介紹
 
-```python
-import discord
-from discord.ext import commands
-import os
+### 公告功能
+- **指令**: `!公告 <內容>`
+- **說明**: 發布公告到指定頻道。
+- **權限**: 需要管理員權限。
 
-# 設置機器人的意圖
-intents = discord.Intents.default()
-intents.message_content = True
+### 帳號管理功能
+- **指令**: `!創建帳號`
+- **說明**: 創建一個新的用戶帳號。
+- **指令**: `!登入 <帳號或電子郵件> <密碼>`
+- **說明**: 登入到您的帳號。
 
-# 創建機器人實例
-bot = commands.Bot(command_prefix='!', intents=intents)
+### 使用者資訊功能
+- **指令**: `!使用者`
+- **說明**: 查看您的個人資料。
+- **指令**: `!搜尋使用者 <用戶名>`
+- **說明**: 搜尋伺服器中的用戶。
 
-# 當機器人準備就緒時執行的事件
-@bot.event
-async def on_ready():
-    await bot.tree.sync()
-    print(f'已啟動 {bot.user} 的聊天服務')
+### 語音頻道管理功能
+- **指令**: `!管理語音頻道`
+- **說明**: 管理您當前的語音頻道。
+- **指令**: `!make_admin <@用戶>`
+- **說明**: 設定指定用戶為語音頻道管理員。
+- **指令**: `!ban_user <@用戶>`
+- **說明**: 禁止指定用戶進入語音頻道。
+- **指令**: `!set_public <True/False>`
+- **說明**: 設定語音頻道為公開或私密。
 
-# 加載所有的 Cogs
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        bot.load_extension(f'cogs.{filename[:-3]}')
+### 檢舉系統功能
+- **指令**: `!檢舉紀錄 @用戶`
+- **說明**: 查詢指定用戶的檢舉紀錄。
+- **指令**: `!被檢舉紀錄 @用戶`
+- **說明**: 查詢指定用戶的被檢舉紀錄。
+- **指令**: `!檢舉案件 [搜尋條件]`
+- **說明**: 查詢符合條件的檢舉案件。
+- **指令**: `!help_report`
+- **說明**: 查看檢舉系統的指令說明。
 
-# 運行機器人
-bot.run('YOUR_BOT_TOKEN')
-```
+### 錯誤處理功能
+- **說明**: 自動處理機器人運行過程中的錯誤並嘗試重連。
 
-1.設置機器人的意圖:
-```python
-intents = discord.Intents.default()
-intents.message_content = True
-```
-這段代碼設置了機器人的意圖，允許機器人讀取消息內容。
+## 如何運行？
 
-2.創建機器人實例:
-```python
-bot = commands.Bot(command_prefix='!', intents=intents)
-```
-這段代碼創建了一個機器人實例，並設置指令前綴為 !。
+1. 安裝所需的庫（比如 Discord.py，後續需要什麼功能可以自己再下載）：
+    ```bash
+    pip install discord.py
+    ```
 
-3.當機器人準備就緒時執行的事件:
-```python
-@bot.event
-async def on_ready():
-    await bot.tree.sync()
-    print(f'已啟動 {bot.user} 的聊天服務')
-```
-當機器人準備就緒時，這段代碼會同步應用指令樹並打印一條消息。
+2. 到 [Discord Developer Portal](https://discord.com/developers/applications) 取得你的機器人 Token，並將你的機器人 Token 替換到所有檔案中的 `YOUR_BOT_TOKEN` 字樣。
 
-4.加載所有的 Cogs:
-```python
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        bot.load_extension(f'cogs.{filename[:-3]}')
-```
-這段代碼會遍歷 ./cogs 目錄中的所有 .py 文件並加載它們作為擴展。
+3. 確認完所有代碼後運行機器人：
+    ```bash
+    python main.py
+    ```
 
-5.運行機器人:
-```python
-bot.run('YOUR_BOT_TOKEN')
-```
-這段代碼會運行機器人，並需要替換 'YOUR_BOT_TOKEN' 為你的實際機器人令牌。
-
-# 如何運行？
-1.安裝所需的庫(比如Discord.py，後續需要什麼功能可以自己再下載)：
-```python
-pip install discord.py
-```
-2.到Discord Developement Portal這個網站上取得你的機器人Token，b06c.4將你的機器人Token替換到所有檔案中的中的"YOUR_BOT_TOKEN"字樣。
-3.確認完所有代碼後運行機器人
-```python
-python main.py
-```
-# 目錄結構
-.
-├── main.py(斜線指令檔案)
-└── cogs
-    ├── (功能檔案).py
-    └── (功能檔案).py
-# 授權
-此項目有藉助於Copilot AI以及部分Github開源項目，使用 MIT 授權。詳情請參閱 LICENSE 文件。
-
-希望這個 README 能夠幫助你更好地介紹和使用你的 Discord 機器人項目。
+## 目錄結構
