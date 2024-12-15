@@ -19,7 +19,7 @@ class ErrorHandlerCog(commands.Cog):
     async def on_disconnect(self):
         logging.warning("機器人已斷線! Attempting to reconnect...")
         try:
-            await self.bot.login(os.getenv('你的Discord機器人Token')) # 這裡要換成你的機器人Token
+            await self.bot.login(os.getenv('YOUR_BOT_TOKEN')) # DC-TODO: Replace this with your bot token
         except Exception as e:
             logging.error("Failed to reconnect: %s", e)
             os.execv(sys.executable, ['python'] + sys.argv)

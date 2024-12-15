@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord 管理系統 - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .admin-sidebar {
+            width: 250px;
+            background: #333; /* Dark gray background */
+            color: #fff; /* Light text */
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            overflow-y: auto;
+        }
+        
+        .admin-main {
+            flex: 1;
+            padding: 30px;
+            background: #444; /* Darker main background */
+            color: #fff; /* Light text */
+            margin-left: 250px;
+        }
+
+        .sidebar-menu {
+            margin-top: 20px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #fff; /* Light text */
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            transition: background 0.3s;
+        }
+
+        .sidebar-menu a:hover,
+        .sidebar-menu a.active {
+            background: #555; /* Highlight color */
+        }
+
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .admin-card {
+            background: #333;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #555;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .user-avatar {
+            width: 30px; /* Reduce the size */
+            height: 30px; /* Reduce the size */
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .btn {
+            background: #555; /* Button background */
+            color: #fff; /* Light text for buttons */
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 100%;
+                padding: 10px;
+                position: static;
+                height: auto;
+            }
+            .admin-main {
+                padding: 10px;
+                margin-left: 0;
+            }
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    <!-- 主導航欄 -->
+    <nav class="main-nav">
+        <div class="nav-brand">
+            <a href="/">Discord Bot 管理系統</a>
+        </div>
+        <div class="nav-links">
+            <a href="/" class="nav-item"><i class="fas fa-home"></i> 首頁</a>
+            <a href="/voice-rooms" class="nav-item"><i class="fas fa-microphone"></i> 語音房</a>
+            <a href="/admin" class="nav-item"><i class="fas fa-cog"></i> 管理中心</a>
+        </div>
+        <div class="nav-user">
+            {% if session.user_id %}
+                <img src="{{ session.avatar_url }}" alt="avatar" class="user-avatar">
+                <span>{{ session.username }}</span>
+                <a href="/logout" class="logout-btn">登出</a>
+            {% else %}
+                <a href="/login" class="login-btn">登入</a>
+            {% endif %}
+        </div>
+        <button class="hamburger" onclick="toggleMenu()" title="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+
+    <div class="admin-container">
+        <!-- 側邊管理選單 -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">管理選單</div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/members"><i class="fas fa-users"></i> 成員管理</a></li>
+                <li><a href="/admin/channels"><i class="fas fa-hashtag"></i> 頻道管理</a></li>
+                <li><a href="/admin/roles"><i class="fas fa-user-tag"></i> 身分組管理</a></li>
+                <li><a href="/admin/settings"><i class="fas fa-cogs"></i> 系統設定</a></li>
+            </ul>
+        </aside>
+
+        <!-- 主要內容區 -->
+        <main class="admin-main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

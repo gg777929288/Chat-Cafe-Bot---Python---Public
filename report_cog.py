@@ -5,6 +5,7 @@ import asyncio
 import hashlib
 import sqlite3
 from discord.ext import commands
+from Userfile.convert_to_sql import convert_to_sql  # Import the new function
 
 class ReportCog(commands.Cog):
     def __init__(self, bot):
@@ -232,10 +233,15 @@ class ReportCog(commands.Cog):
                 report_hash = self.hash_report(report_data)
                 report_data.append(report_hash)
 
+                # Save to the original database
                 with self.conn:
                     self.conn.execute('''INSERT INTO reports (
                         case_number, reporter_id, reported_id, violation_type, violation_reason, channel, time, evidence, timestamp, hash
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', report_data)
+
+                # Convert to SQL file
+                sql_file_path = os.path.join("Userfile/reports", f"report_{case_number}.sql")
+                convert_to_sql(report_data, sql_file_path)
 
                 report_file = f"Userfile/reports/report_{case_number}.txt"
                 with open(report_file, "w", encoding="utf-8") as f:
@@ -253,7 +259,7 @@ class ReportCog(commands.Cog):
                     f.write(f"證據截圖: {answers[5]}\n")
                     f.write(f"報告哈希: {report_hash}\n")
 
-                admin_channel = self.bot.get_channel(00000000000000000) #插入你的管理員頻道ID
+                admin_channel = self.bot.get_channel(834487721619357726)
                 if admin_channel:
                     # Try to fetch the reported user
                     try:
@@ -307,7 +313,7 @@ class ReportCog(commands.Cog):
                         for screenshot_url in answers[5]:
                             await admin_channel.send(screenshot_url)
 
-                await message.author.send("感謝您的檢舉，管理員會盡快處理。您的檢舉資料已被保存，以作為未來處理依據。")
+                await message.author.send("感謝您的檢舉��管理員會盡快處理。您的檢舉資料已被保存，以作為未來處理依據。")
                 await message.author.send("建議您至客服頻道與我們有更進一步的聯絡。")
 
             except discord.Forbidden:
@@ -486,7 +492,7 @@ class ReportCog(commands.Cog):
             "**檢舉系統指令說明：**\n"
             "`!檢舉紀錄 @用戶` - 查詢指定用戶的檢舉紀錄。\n"
             "`!被檢舉紀錄 @用戶` - 查詢指定用戶的被檢舉紀錄。\n"
-            "`!檢舉案件 [搜尋條件]` - 查詢符合條件的檢���案件。\n"
+            "`!檢舉案件 [搜尋條件]` - 查詢符合條件的檢舉案件。\n"
             "  - 搜尋條件格式：`檢舉人:<ID>` `被檢舉人:<ID>` `管理員:<ID>` `違規類型:<類型>` `事發頻道:<頻道>`\n"
             "  - 例如：`!檢舉案件 檢舉人:123456789 違規類型:騷擾`\n"
         )

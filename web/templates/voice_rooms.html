@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block title %}語音房管理{% endblock %}
+
+{% block styles %}
+<style>
+    .voice-rooms {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    .room-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .room-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .room-controls {
+        margin-top: 10px;
+        display: flex;
+        gap: 10px;
+    }
+    /* 模態框樣式 */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+
+    .modal-content {
+        position: relative;
+        background-color: white;
+        margin: 5% auto;
+        padding: 20px;
+        width: 80%;
+        max-width: 800px;
+        border-radius: 8px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .log-entry {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .log-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 5px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+
+    .timestamp {
+        color: #666;
+        font-size: 0.9em;
+        margin-left: auto;
+    }
+
+    .logs-container {
+        margin-top: 20px;
+    }
+
+    .log-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .log-tab {
+        padding: 8px 16px;
+        border: none;
+        background: #f0f0f0;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .log-tab.active {
+        background: #1a73e8;
+        color: white;
+    }
+
+    .log-content {
+        display: none;
+    }
+
+    .log-content.active {
+        display: block;
+    }
+    .room-sections {
+        margin: 20px 0;
+    }
+    
+    .section-title {
+        margin: 20px 0 10px;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #1a73e8;
+    }
+    
+    .room-card {
+        background: white;
+        padding: 20px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .room-info {
+        margin-bottom: 10px;
+    }
+    
+    .room-members {
+        margin: 10px 0;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 4px;
+    }
+    
+    .member-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .settings-form {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+    }
+    
+    .form-group {
+        margin-bottom: 10px;
+    }
+    
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: #1a73e8;
+        color: white;
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="voice-rooms">
+    <h1>語音房管理</h1>
+    <button onclick="refreshRooms()" class="btn btn-primary">刷新列表</button>
+    
+    <div class="room-sections">
+        <div id="active-rooms">
+            <h2 class="section-title">使用中的頻道</h2>
+            <div class="room-grid"></div>
+        </div>
+        <!-- Removed sections -->
+    </div>
+</main>
+<!-- 添加模態框 -->
+<div id="logsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2>頻道紀錄</h2>
+        <div class="log-tabs">
+            <button class="log-tab active" onclick="showLogTab('permission')">權限變更</button>
+            <button class="log-tab" onclick="showLogTab('text')">文字對話</button>
+        </div>
+        <div class="logs-container">
+            <div id="permissionLogs" class="log-content active"></div>
+            <div id="textLogs" class="log-content"></div>
+        </div>
+    </div>
+</div>
+<div id="deleteConfirmModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeDeleteModal()">&times;</span>
+        <h2>確認刪除頻道</h2>
+        <div id="deleteConfirmContent">
+            <p>以下成員目前在頻道中：</p>
+            <div id="activeMembers"></div>
+        </div>
+        <div class="dialog-buttons" style="margin-top: 20px;">
+            <button onclick="confirmDelete()" class="danger-btn">確定刪除</button>
+            <button onclick="closeDeleteModal()" class="cancel-btn">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 設置編輯模態框 -->
+<div id="settingsModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>頻道設置</h2>
+        <form id="channelSettingsForm">
+            <div class="form-group">
+                <label>頻道名稱</label>
+                <input type="text" name="name" required>
+            </div>
+            <div class="form-group">
+                <label>人數限制</label>
+                <input type="number" name="user_limit" min="0" max="99">
+            </div>
+            <div class="form-group">
+                <label>品質設定</label>
+                <select name="bitrate">
+                    <option value="64000">64 kbps</option>
+                    <option value="96000">96 kbps</option>
+                    <option value="128000">128 kbps</option>
+                    <option value="256000">256 kbps</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>區域設定</label>
+                <select name="region">
+                    <option value="japan">日本</option>
+                    <option value="hongkong">香港</option>
+                    <option value="singapore">新加坡</option>
+                    <option value="auto">自動</option>
+                </select>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary">保存設置</button>
+                <button type="button" class="btn" onclick="closeModal('settingsModal')">取消</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function refreshRooms() {
+        try {
+            const response = await fetch('/api/voice-rooms');
+            const data = await response.json();
+            
+            updateRoomSection('active-rooms', data.active_rooms);
+            // Removed sections
+        } catch (error) {
+            console.error('Error refreshing rooms:', error);
+            alert('刷新頻道列表時發生錯誤');
+        }
+    }
+
+    function updateRoomSection(sectionId, rooms) {
+        const section = document.querySelector(`#${sectionId} .room-grid`);
+        section.innerHTML = rooms.map(room => createRoomCard(room, sectionId)).join('');
+    }
+
+    function createRoomCard(room, sectionType) {
+        const isActive = sectionType === 'active-rooms';
+        return `
+            <div class="room-card" data-id="${room.channel_id}">
+                <div class="room-info">
+                    <h3>${room.channel_name || '未命名頻道'}</h3>
+                    <p>擁有者: ${room.owner_name || room.owner_id}</p>
+                    ${room.settings ? `
+                        <p>人數限制: ${room.settings.user_limit || '無限制'}</p>
+                        <p>頻道品質: ${(room.settings.bitrate/1000) || 64} kbps</p>
+                    ` : ''}
+                </div>
+                ${room.members ? `
+                    <div class="room-members">
+                        <h4>當前成員 (${room.members.length})</h4>
+                        <div class="member-list">
+                            ${room.members.map(member => `
+                                <span class="member-tag">${member.display_name}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+                ${isActive ? `
+                    <div class="btn-group">
+                        <button onclick="openSettings('${room.channel_id}')" class="btn">設置</button>
+                        <button onclick="confirmDelete('${room.channel_id}')" class="btn btn-danger">刪除</button>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    async function openSettings(channelId) {
+        try {
+            const response = await fetch(`/api/voice-rooms/${channelId}/permissions`);
+            const settings = await response.json();
+            
+            const form = document.getElementById('channelSettingsForm');
+            form.elements.name.value = settings.name;
+            form.elements.user_limit.value = settings.user_limit;
+            form.elements.bitrate.value = settings.bitrate;
+            form.elements.region.value = settings.region;
+            
+            form.dataset.channelId = channelId;
+            document.getElementById('settingsModal').style.display = 'block';
+        } catch (error) {
+            console.error('Error loading settings:', error);
+            alert('載入頻道設置時發生錯誤');
+        }
+    }
+
+    document.getElementById('channelSettingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const form = e.target;
+        const channelId = form.dataset.channelId;
+        
+        const settings = {
+            name: form.elements.name.value,
+            user_limit: parseInt(form.elements.user_limit.value),
+            bitrate: parseInt(form.elements.bitrate.value),
+            region: form.elements.region.value
+        };
+        
+        try {
+            const response = await fetch(`/api/voice-rooms/${channelId}/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settings)
+            });
+            
+            if (!response.ok) throw new Error('更新失敗');
+            
+            closeModal('settingsModal');
+            refreshRooms();
+            alert('設置已更新');
+        } catch (error) {
+            console.error('Error saving settings:', error);
+            alert('保存設置時發生錯誤');
+        }
+    });
+
+    async function confirmDelete(channelId) {
+        try {
+            const response = await fetch(`/api/voice-rooms/${channelId}/members`);
+            const members = await response.json();
+            const activeMembers = members.filter(m => m.in_channel);
+            
+            if (activeMembers.length > 0) {
+                alert('無法刪除：頻道中還有成員');
+                return;
+            }
+
+            if (confirm('確定要刪除此頻道嗎？此操作無法復原！')) {
+                const deleteResponse = await fetch(`/api/voice-rooms/${channelId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await deleteResponse.json();
+                
+                if (!deleteResponse.ok) {
+                    throw new Error(data.error || '刪除失敗');
+                }
+                
+                refreshRooms();
+                alert('頻道已成功刪除');
+            }
+        } catch (error) {
+            console.error('Error handling delete:', error);
+            alert('刪除頻道時發生錯誤: ' + error.message);
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+
+    document.querySelectorAll('.close-modal').forEach(button => {
+        button.onclick = function() {
+            this.closest('.modal').style.display = 'none';
+        }
+    });
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', refreshRooms);
+    setInterval(refreshRooms, 30000);
+</script>
+<style>
+    .log-entry {
+        border-bottom: 1px solid #eee;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .log-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 5px;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+    }
+    
+    .user-avatar-small {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        vertical-align: middle;
+    }
+    
+    .operator-name {
+        font-weight: bold;
+    }
+    
+    .timestamp {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .log-content {
+        margin-left: 40px;
+    }
+    
+    .action {
+        color: #1a73e8;
+    }
+    
+    .target {
+        margin-left: 8px;
+    }
+    
+    .details {
+        color: #666;
+        margin-left: 8px;
+    }
+    .error-message {
+        background-color: #ffebee;
+        color: #c62828;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        border: 1px solid #ef9a9a;
+    }
+</style>
+{% endblock %}
+

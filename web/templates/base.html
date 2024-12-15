@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Discord Bot 管理系統{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 共用的導航欄樣式 */
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            position: relative;
+            width: 100%;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-links li {
+            margin: 0 10px;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .hamburger span {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 5px 0;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: #333;
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .nav-links li {
+                text-align: center;
+                margin: 10px 0;
+            }
+            .hamburger {
+                display: flex;
+            }
+        }
+        
+        /* 下拉選單樣式 */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #333;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1000;
+            padding: 0;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-menu li {
+            margin: 0;
+            display: block;
+        }
+
+        .dropdown-menu a {
+            padding: 12px 16px;
+            display: block;
+            color: white;
+            text-decoration: none;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .dropdown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                display: none;
+            }
+
+            .dropdown.active .dropdown-menu {
+                display: block;
+            }
+        }
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .logout-btn, .login-btn {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body>
+    {% include 'nav.html' %}
+    <!--
+    <nav class="admin-navbar">
+        <div class="user-status">
+            {% if session.user_id %}
+                <span>{{ session.username }}</span>
+                <img src="{{ session.avatar_url }}" alt="User Avatar" class="user-avatar">
+                <a href="{{ url_for('logout') }}" class="logout-btn">登出</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="login-btn">登入</a>
+            {% endif %}
+        </div>
+    </nav>
+    -->
+    {% block content %}{% endblock %}
+    <script>
+        function toggleMenu() {
+            const navContainer = document.querySelector('.nav-container');
+            navContainer.classList.toggle('active');
+            
+            const hamburger = document.querySelector('.hamburger');
+            hamburger.classList.toggle('active');
+        }
+
+        // 添加移動端下拉選單切換
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    e.preventDefault();
+                    toggle.parentElement.classList.toggle('active');
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

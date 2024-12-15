@@ -1,0 +1,15 @@
+
+/* ...existing code... */
+
+/* 新增滾動條樣式 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+/* ...existing code... */

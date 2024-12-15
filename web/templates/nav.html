@@ -1,0 +1,80 @@
+<header class="main-header">
+    <nav class="main-nav">
+        <div class="nav-brand">
+            <a href="/">Discord Bot 管理系統</a>
+        </div>
+        
+        <div class="nav-container">
+            <ul class="nav-links">
+                <li><a href="/" class="nav-item"><i class="fas fa-home"></i>首頁</a></li>
+                <li><a href="/voice-rooms" class="nav-item"><i class="fas fa-microphone"></i>語音房管理</a></li>
+                <li><a href="/admin" class="nav-item"><i class="fas fa-cog"></i>管理中心</a></li>
+                <li><a href="/admin/channels" class="nav-item"><i class="fas fa-server"></i>伺服器管理</a></li>
+                <li><a href="/admin/members" class="nav-item"><i class="fas fa-users"></i>成員管理</a></li>
+            </ul>
+
+            <div class="nav-user">
+                {% if session.user_id %}
+                    <div class="user-profile dropdown">
+                        <img src="{{ session.avatar_url }}" alt="User Avatar" class="user-avatar dropdown-toggle" onclick="toggleDropdown(event)">
+                        <div class="dropdown-menu business-card" id="user-card" style="display: none;">
+                            <div class="user-info">
+                                <img src="{{ session.avatar_url }}" alt="User Avatar" class="card-avatar">
+                                <div class="card-details">
+                                    <div class="detail-item" style="text-align: left; color: black;"><strong>使用者名稱:</strong> {{ session.username }}</div>
+                                    <div class="detail-item" style="text-align: left; color: black;"><strong>ID:</strong> {{ session.user_id }}</div>
+                                    <div class="detail-item" style="text-align: left; color: black;"><strong>暱稱:</strong> {{ session.nickname }}</div>
+                                    <div class="detail-item" style="text-align: left; color: black;"><strong>Email:</strong> {{ session.email }}</div>
+                                    {% if session.is_admin %}
+                                        <div class="detail-item admin-icon"><i class="fas fa-shield-alt"></i> 管理員</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{{ url_for('logout') }}" class="logout-btn">登出</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="login-btn">登入</a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <button class="hamburger" onclick="toggleMenu()" title="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </nav>
+</header>
+
+<script>
+function toggleDropdown(event) {
+    event.stopPropagation();
+    const dropdownMenu = document.getElementById('user-card');
+    dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+    if (dropdownMenu.style.display === 'block') {
+        document.addEventListener('click', closeDropdownOnClickOutside);
+    } else {
+        document.removeEventListener('click', closeDropdownOnClickOutside);
+    }
+}
+
+function closeDropdown() {
+    const dropdownMenu = document.getElementById('user-card');
+    dropdownMenu.style.display = 'none';
+    document.removeEventListener('click', closeDropdownOnClickOutside);
+}
+
+function closeDropdownOnClickOutside(event) {
+    const dropdownMenu = document.getElementById('user-card');
+    const userProfile = document.querySelector('.user-profile');
+    if (!dropdownMenu.contains(event.target) && !userProfile.contains(event.target)) {
+        closeDropdown();
+    }
+}
+
+// Ensure the card is not shown by default
+document.addEventListener('DOMContentLoaded', () => {
+    closeDropdown();
+});
+</script>

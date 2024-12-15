@@ -1,0 +1,202 @@
+{% extends "admin_layout.html" %}
+{% block title %}成員管理{% endblock %}
+
+{% block styles %}
+<style>
+    .members-container {
+        padding: 20px;
+        color: #000; /* Change text color to black */
+    }
+    
+    .members-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .search-bar {
+        display: flex;
+        gap: 10px;
+        width: 300px;
+    }
+    
+    .members-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .member-card {
+        background: rgb(78, 78, 78);
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .member-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .member-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .member-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+    }
+    
+    .member-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+    
+    .modal-content {
+        position: relative;
+        background: rgb(49, 48, 48);
+        width: 90%;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .modal-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .modal-tab {
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .modal-tab.active {
+        background: #7289da;
+        color: white;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        color: black; /* Change text color to black */
+    }
+    
+    .btn-danger {
+        background: #dc3545;
+    }
+    
+    .btn-warning {
+        background: #ffc107;
+    }
+    
+    .role-tag {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin: 2px;
+        font-size: 12px;
+        background: #7289da;
+        color: rgb(255, 255, 255);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="members-container">
+    <div class="members-header">
+        <h1>成員管理</h1>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜尋成員..." class="form-control">
+            <button onclick="refreshMembers()" class="btn btn-primary">刷新</button>
+        </div>
+    </div>
+    
+    <div class="members-grid" id="membersGrid">
+        <!-- Members will be loaded here -->
+    </div>
+    <!-- 移除分頁按鈕 -->
+    {# <div class="pagination">
+        <button id="prevPage">上一頁</button>
+        <span>第 <span id="currentPage">1</span> 頁，共 <span id="totalPages">71</span> 頁</span>
+        <button id="nextPage">下一頁</button>
+    </div> #}
+</div>
+
+<div class="members-section" style="color: #000;">
+    <!-- 成員相關內容 -->
+</div>
+
+<!-- Member Details Modal -->
+<div id="memberModal" class="member-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>成員資料</h2>
+            <button onclick="closeModal()" class="btn">&times;</button>
+        </div>
+        <div class="modal-tabs">
+            <div class="modal-tab active" onclick="switchTab('info')">基本資訊</div>
+            <div class="modal-tab" onclick="switchTab('roles')">身分組</div>
+            <div class="modal-tab" onclick="switchTab('permissions')">權限</div>
+            <div class="modal-tab" onclick="switchTab('activity')">活動紀錄</div>
+        </div>
+        <div id="modalContent">
+            <!-- Modal content will be loaded here -->
+        </div>
+        <div class="action-buttons">
+            <button class="btn btn-warning mute-button" data-member-id="">禁言</button>
+            <button class="btn btn-danger kick-button" data-member-id="">踢出</button>
+            <button class="btn btn-danger block-button" data-member-id="">封鎖</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentMemberId = null;
+// 移除重複的 currentPage 宣告
+// let currentPage = 1; // 已在 members.js 中宣告
+// const membersPerPage = 50; // 已在 members.js 中宣告
+
+// 移除對分頁元素的操作
+// document.getElementById('currentPage').textContent = data.currentPage;
+// document.getElementById('totalPages').textContent = data.totalPages;
+// document.getElementById('prevPage').disabled = data.currentPage <= 1;
+// document.getElementById('nextPage').disabled = data.currentPage >= data.totalPages;
+
+// 移除對分頁按鈕的事件監聽
+// document.getElementById('prevPage').addEventListener('click', prevPage);
+// document.getElementById('nextPage').addEventListener('click', nextPage);
+</script>
+<script src="{{ url_for('static', filename='js/members.js') }}"></script>
+{% endblock %}

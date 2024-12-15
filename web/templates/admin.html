@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discord 機器人管理儀表板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Updated to black */
+            color: #e0e0e0; /* Light text color */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1f1f1f;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: relative;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        .nav-links li {
+            margin: 0 10px;
+            flex: 1 1 auto;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 5px;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: #1f1f1f;
+            }
+            .nav-links li {
+                text-align: center;
+                margin: 10px 0;
+            }
+            .hamburger {
+                display: flex;
+            }
+        }
+        main {
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #e0e0e0;
+        }
+        .section {
+            background-color: #1f1f1f;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #333;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+        }
+        button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .tab {
+            display: none;
+        }
+        .tab.active {
+            display: block;
+        }
+        .tab-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .tab-buttons button {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    {% extends "base.html" %}
+
+    {% block title %}管理中心{% endblock %}
+
+    {% block styles %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Updated to black */
+            color: #e0e0e0; /* Light text color */
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1f1f1f;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            position: relative;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        .nav-links li {
+            margin: 0 10px;
+            flex: 1 1 auto;
+        }
+        .nav-links a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #fff;
+            margin: 5px;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: #1f1f1f;
+            }
+            .nav-links li {
+                text-align: center;
+                margin: 10px 0;
+            }
+            .hamburger {
+                display: flex;
+            }
+        }
+        main {
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #e0e0e0;
+        }
+        .section {
+            background-color: #1f1f1f;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #333;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+        }
+        button {
+            background-color: #333;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .tab {
+            display: none;
+        }
+        .tab.active {
+            display: block;
+        }
+        .tab-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .tab-buttons button {
+            flex: 1;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <main>
+        <div class="tab-buttons">
+            <button onclick="showTab('status')">機器人狀態</button>
+            <button onclick="showTab('logs')">日誌資訊</button>
+            <button onclick="showTab('reports')">報告資料</button>
+            <button onclick="showTab('users')">用戶資訊</button>
+            <button onclick="showTab('voice-channels')">語音頻道</button>
+        </div>
+        <section id="status" class="tab active">
+            <h2>機器人狀態</h2>
+            <p id="bot-status">載入中...</p>
+            <p id="bot-status-details">載入中...</p>
+            <button onclick="startBot()">啟動機器人</button>
+            <button onclick="stopBot()">停止機器人</button>
+        </section>
+        <section id="logs" class="tab">
+            <h2>日誌資訊</h2>
+            <textarea id="log-output" rows="20" readonly></textarea>
+        </section>
+        <section id="reports" class="tab">
+            <h2>報告資料</h2>
+            <input type="text" id="report-search" placeholder="搜尋報告...">
+            <button onclick="fetchReports()">獲取報告</button>
+            <table id="report-table">
+                <thead>
+                    <tr>
+                        <th>案件編號</th>
+                        <th>檢舉者 ID</th>
+                        <th>被檢舉者 ID</th>
+                        <th>違規類型</th>
+                        <th>頻道</th>
+                        <th>時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+        <section id="users" class="tab">
+            <h2>用戶資訊</h2>
+            <button onclick="fetchUsers()">獲取用戶</button>
+            <table id="user-table">
+                <thead>
+                    <tr>
+                        <th>用戶 ID</th>
+                        <th>用戶名</th>
+                        <th>電子郵件</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+        <section id="voice-channels" class="tab">
+            <h2>語音頻道</h2>
+            <div class="tab-buttons">
+                <button onclick="showVoiceTab('channels')">頻道管理</button>
+                <button onclick="showVoiceTab('history')">歷史紀錄</button>
+                <button onclick="showVoiceTab('permissions')">權限管理</button>
+            </div>
+            <div id="voice-channels-content">
+                <div id="channels" class="voice-tab active">
+                    <button onclick="fetchVoiceChannels()">獲取語音頻道</button>
+                    <table id="voice-channel-table">
+                        <thead>
+                            <tr>
+                                <th>頻道 ID</th>
+                                <th>名稱</th>
+                                <th>用戶限制</th>
+                                <th>比特率</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div id="history" class="voice-tab">
+                    <button onclick="fetchVoiceHistory()">獲取歷史紀錄</button>
+                    <table id="voice-history-table">
+                        <thead>
+                            <tr>
+                                <th>紀錄 ID</th>
+                                <th>頻道 ID</th>
+                                <th>用戶 ID</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div id="permissions" class="voice-tab">
+                    <button onclick="fetchVoicePermissions()">獲取權限</button>
+                    <table id="voice-permissions-table">
+                        <thead>
+                            <tr>
+                                <th>權限 ID</th>
+                                <th>頻道 ID</th>
+                                <th>用戶 ID</th>
+                                <th>權限</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <div class="admin-main-content" style="color: #000;">
+            <!-- 管理員主內容 -->
+        </div>
+    </main>
+
+    <!-- Modal for report details -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>報告詳細資料</h2>
+            <div id="report-details"></div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function fetchBotStatus() {
+            const response = await fetch('/bot-status');
+            const status = await response.text();
+            document.getElementById('bot-status').innerText = status;
+        }
+
+        async function fetchBotStatusDetails() {
+            const response = await fetch('/bot-status-details');
+            const details = await response.json();
+            document.getElementById('bot-status-details').innerText = `狀態: ${details.status}, PID: ${details.pid || 'N/A'}`;
+        }
+
+        async function fetchLogOutput() {
+            const response = await fetch('/log-output');
+            const output = await response.text();
+            document.getElementById('log-output').value = output;
+        }
+
+        async function startBot() {
+            await fetch('/start-bot', { method: 'POST' });
+            fetchBotStatus();
+            fetchBotStatusDetails();
+            fetchLogOutput();
+        }
+
+        async function stopBot() {
+            await fetch('/stop-bot', { method: 'POST' });
+            fetchBotStatus();
+            fetchBotStatusDetails();
+            fetchLogOutput();
+        }
+
+        async function fetchReports() {
+            const searchQuery = document.getElementById('report-search').value;
+            const response = await fetch(`/admin/reports?search=${searchQuery}`);
+            const reports = await response.json();
+            const reportTableBody = document.getElementById('report-table').querySelector('tbody');
+            reportTableBody.innerHTML = '';
+            reports.forEach(report => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${report[1]}</td>
+                    <td>${report[2]}</td>
+                    <td>${report[3]}</td>
+                    <td>${report[4]}</td>
+                    <td>${report[6]}</td>
+                    <td>${report[7]}</td>
+                    <td><button onclick="viewReportDetails(${report[0]})">查看</button></td>
+                `;
+                reportTableBody.appendChild(row);
+            });
+        }
+
+        async function fetchUsers() {
+            const response = await fetch('/admin/users');
+            const users = await response.json();
+            const userTableBody = document.getElementById('user-table').querySelector('tbody');
+            userTableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user[0]}</td>
+                    <td>${user[1]}</td>
+                    <td>${user[2]}</td>
+                `;
+                userTableBody.appendChild(row);
+            });
+        }
+
+        async function fetchVoiceChannels() {
+            const response = await fetch('/api/voice-channels');
+            const channels = await response.json();
+            const channelTableBody = document.getElementById('voice-channel-table').querySelector('tbody');
+            channelTableBody.innerHTML = '';
+            channels.forEach(channel => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${channel[0]}</td>
+                    <td>${channel[1]}</td>
+                    <td>${channel[2]}</td>
+                    <td>${channel[3]}</td>
+                    <td>
+                        <button onclick="viewVoiceChannelDetails(${channel[0]})">查看</button>
+                        <button onclick="editVoiceChannel(${channel[0]})">編輯</button>
+                        <button onclick="deleteVoiceChannel(${channel[0]})">刪除</button>
+                    </td>
+                `;
+                channelTableBody.appendChild(row);
+            });
+        }
+
+        async function fetchVoiceHistory() {
+            const response = await fetch('/api/voice-history');
+            const history = await response.json();
+            const historyTableBody = document.getElementById('voice-history-table').querySelector('tbody');
+            historyTableBody.innerHTML = '';
+            history.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry[0]}</td>
+                    <td>${entry[1]}</td>
+                    <td>${entry[2]}</td>
+                    <td><button onclick="viewVoiceHistoryEntry(${entry[0]})">查看</button></td>
+                `;
+                historyTableBody.appendChild(row);
+            });
+        }
+
+        async function fetchVoicePermissions() {
+            try {
+                const response = await fetch('/api/voice-channels-permissions');
+                const permissions = await response.json();
+                if (!Array.isArray(permissions)) {
+                    throw new Error('Invalid response format');
+                }
+                const permissionsTableBody = document.getElementById('voice-permissions-table').querySelector('tbody');
+                permissionsTableBody.innerHTML = '';
+                permissions.forEach(permission => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${permission[0]}</td>
+                        <td>${permission[1]}</td>
+                        <td>${permission[2]}</td>
+                        <td>${permission[3]}</td>
+                        <td><button onclick="viewVoicePermission(${permission[0]})">查看</button></td>
+                    `;
+                    permissionsTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching voice permissions:', error);
+                alert('Failed to fetch voice permissions');
+            }
+        }
+
+        async function viewVoiceChannelDetails(channelId) {
+            const response = await fetch(`/api/voice-channels/${channelId}`);
+            const channel = await response.json();
+            alert(`頻道 ID: ${channel[0]}\n名稱: ${channel[1]}\n用戶限制: ${channel[2]}\n比特率: ${channel[3]}`);
+        }
+
+        async function viewVoiceHistoryEntry(historyId) {
+            const response = await fetch(`/api/voice-history/${historyId}`);
+            const entry = await response.json();
+            alert(`紀錄 ID: ${entry[0]}\n頻道 ID: ${entry[1]}\n用戶 ID: ${entry[2]}`);
+        }
+
+        async function viewVoicePermission(permissionId) {
+            const response = await fetch(`/api/voice-channels-permissions/${permissionId}`);
+            const permission = await response.json();
+            alert(`權限 ID: ${permission[0]}\n頻道 ID: ${permission[1]}\n用戶 ID: ${permission[2]}\n權限: ${permission[3]}`);
+        }
+
+        async function editVoiceChannel(channelId) {
+            const name = prompt('輸入新的頻道名稱:');
+            const userLimit = prompt('輸入新的用戶限制:');
+            const bitrate = prompt('輸入新的比特率:');
+            const response = await fetch(`/api/voice-channels/${channelId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, user_limit: userLimit, bitrate })
+            });
+            if (response.ok) {
+                fetchVoiceChannels();
+            } else {
+                alert('更新失敗');
+            }
+        }
+
+        async function deleteVoiceChannel(channelId) {
+            const response = await fetch(`/api/voice-channels/${channelId}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                fetchVoiceChannels();
+            } else {
+                alert('刪除失敗');
+            }
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        async function viewReportDetails(reportId) {
+            const response = await fetch(`/admin/reports/${reportId}`);
+            const report = await response.json();
+            const reportDetailsDiv = document.getElementById('report-details');
+            reportDetailsDiv.innerHTML = `
+                <p><strong>案件編號:</strong> ${report[1]}</p>
+                <p><strong>檢舉者 ID:</strong> ${report[2]}</p>
+                <p><strong>被檢舉者 ID:</strong> ${report[3] || 'N/A'}</p>
+                <p><strong>違規類型:</strong> ${report[4]}</p>
+                <p><strong>頻道:</strong> ${report[6]}</p>
+                <p><strong>時間:</strong> ${report[7]}</p>
+                ${report[8] ? `<img src="${report[8]}" alt="檢舉圖片" style="max-width: 100%;">` : '<p>檢舉者無提供圖片</p>'}
+            `;
+            document.getElementById('report-modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('report-modal').style.display = 'none';
+        }
+
+        function showVoiceTab(tabId) {
+            document.querySelectorAll('.voice-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBotStatus();
+            fetchBotStatusDetails();
+            fetchLogOutput();
+            setInterval(fetchBotStatus, 5000); // Refresh bot status every 5 seconds
+            setInterval(fetchBotStatusDetails, 5000); // Refresh bot status details every 5 seconds
+            setInterval(fetchLogOutput, 5000); // Refresh log output every 5 seconds
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

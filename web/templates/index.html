@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Discord 機器人儀表板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            background-color: #20232a;
+            color: #61dafb;
+            padding: 15px 0;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        .nav-links li {
+            margin: 0 10px;
+            flex: 1 1 auto;
+        }
+        .nav-links a {
+            color: #61dafb;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #61dafb;
+            margin: 5px;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: #20232a;
+            }
+            .nav-links li {
+                text-align: center;
+                margin: 10px 0;
+            }
+            .hamburger {
+                display: flex;
+            }
+        }
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        h1, h2 {
+            color: #20232a;
+        }
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+        }
+        .discord-widget {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        .member {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .member img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        button {
+            background-color: #20232a;
+            color: #61dafb;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #333;
+        }
+        textarea, pre {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #20232a;
+            text-decoration: none;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    {% extends "base.html" %}
+
+    {% block title %}Discord 機器人儀表板{% endblock %}
+
+    {% block styles %}
+    <style>
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        .status, .logs, .reports {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        header {
+            background-color: #20232a;
+            color: #61dafb;
+            padding: 15px 0;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        .nav-links li {
+            margin: 0 10px;
+            flex: 1 1 auto;
+        }
+        .nav-links a {
+            color: #61dafb;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: #61dafb;
+            margin: 5px;
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                background-color: #20232a;
+            }
+            .nav-links li {
+                text-align: center;
+                margin: 10px 0;
+            }
+            .hamburger {
+                display: flex;
+            }
+        }
+        main {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 1200px;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        h1, h2 {
+            color: #20232a;
+        }
+        .card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+        }
+        .discord-widget {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        .member {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .member img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        button {
+            background-color: #20232a;
+            color: #61dafb;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #333;
+        }
+        textarea, pre {
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #20232a;
+            text-decoration: none;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <main>
+        <section class="card status">
+            <h2>機器人狀態</h2>
+            <p id="bot-status">載入中...</p>
+            <p id="bot-status-details">載入中...</p>
+        </section>
+        <section class="card links">
+            <h2>相關連結</h2>
+            <a href="https://www.coffeeshoptw.com/" target="_blank">咖啡廳官網</a>
+            <a href="https://discord.gg/liao-tian-noka-pei-ting-541557358048837654" target="_blank">咖啡廳官方Discord</a>
+            <a href="https://status.coffeeshoptw.com/" target="_blank">咖啡廳伺服器分析網站</a>
+        </section>
+        <section class="card discord-widget">
+            <h2>Discord Widget</h2>
+            <iframe src="https://discord.com/widget?id=541557358048837654&theme=dark" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+        </section>
+    </main>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function fetchBotStatus() {
+            const response = await fetch('/bot-status');
+            const status = await response.text();
+            document.getElementById('bot-status').innerText = status;
+        }
+
+        async function fetchBotStatusDetails() {
+            const response = await fetch('/bot-status-details');
+            const details = await response.json();
+            document.getElementById('bot-status-details').innerText = `狀態: ${details.status}, PID: ${details.pid || 'N/A'}`;
+        }
+
+        async function fetchLogOutput() {
+            const response = await fetch('/log-output');
+            const output = await response.text();
+            document.getElementById('log-output').value = output;
+        }
+
+        async function startBot() {
+            await fetch('/start-bot', { method: 'POST' });
+            fetchBotStatus();
+            fetchBotStatusDetails();
+            fetchLogOutput();
+        }
+
+        async function stopBot() {
+            await fetch('/stop-bot', { method: 'POST' });
+            fetchBotStatus();
+            fetchBotStatusDetails();
+            fetchLogOutput();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchBotStatus();
+            fetchBotStatusDetails();
+            setInterval(fetchBotStatus, 5000); // Refresh bot status every 5 seconds
+            setInterval(fetchBotStatusDetails, 5000); // Refresh bot status details every 5 seconds
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

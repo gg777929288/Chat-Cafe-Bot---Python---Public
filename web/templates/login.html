@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}咖啡廳後台登入管理系統{% endblock %}
+
+{% block styles %}
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    .discord-login {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: #7289DA;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .discord-login:hover {
+        background: #5a6ec4;
+    }
+    
+    .error-message {
+        color: #dc3545;
+        margin: 10px 0;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-header">
+        <h2>Discord Bot 管理系統</h2>
+        <p>請使用 Discord 帳號登入</p>
+    </div>
+    
+    {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+    {% endif %}
+    
+    <a href="{{ oauth_url }}" class="discord-login">
+        <i class="fab fa-discord"></i> 使用 Discord 登入
+    </a>
+</div>
+{% endblock %}
