@@ -142,9 +142,13 @@
 
 2. 到 [Discord Developer Portal](https://discord.com/developers/applications) 取得你的機器人 Token，並將你的機器人 Token 替換到所有檔案中的 `YOUR_BOT_TOKEN` 字樣。
 
-3. 確認完所有代碼後運行機器人：
+3. 若只要運行機器人，請先確認完所有代碼後運行機器人：
     ```bash
-    python main.py
+    python bot.py
+    ```
+4. 若要先運行網頁，請先至"web"資料夾，然後運行：
+    ```bash
+    python app.py
     ```
 
 ## 如何聯絡我們？
