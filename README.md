@@ -147,4 +147,5 @@
     python main.py
     ```
 
-## 目錄結構
+## 如何聯絡我們？
+   若有問題的話歡迎加入我們的[Discord](https://discord.gg/liao-tian-noka-pei-ting-541557358048837654)與我們聯絡！
